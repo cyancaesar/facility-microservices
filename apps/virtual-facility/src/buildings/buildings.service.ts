@@ -4,6 +4,7 @@ import { UpdateBuildingDto } from './dto/update-building.dto';
 import { Repository } from 'typeorm';
 import { Building } from './entities/building.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateWorkflowDto } from '@app/workflows';
 
 @Injectable()
 export class BuildingsService {
@@ -56,11 +57,15 @@ export class BuildingsService {
   }
 
   async createWorkflow(buildingId: number) {
-    console.log(JSON.stringify({ name: 'My Workflow', buildingId })); // DEBUG
-    return fetch('http://workflows-service:3001/workflows', {
+    console.log(
+      JSON.stringify({ name: 'My Workflow', buildingId } as CreateWorkflowDto),
+    ); // DEBUG
+    const response = await fetch('http://workflows-service:3001/workflows', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'My Workflow', buildingId }),
-    }).then((res) => res.text());
+    });
+    const workflow = await response.json();
+    console.log({ workflow });
   }
 }

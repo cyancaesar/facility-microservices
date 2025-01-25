@@ -10,6 +10,6 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build -- ${APP_NAME}}
+RUN npm run build -- ${APP_NAME}
 
-CMD [ "node", "dist/apps/${APP_NAME}}/main.js" ]
+CMD [ "node", "dist/apps/${APP_NAME}/main.js" ]
