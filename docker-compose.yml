@@ -17,3 +17,8 @@ services:
       - POSTGRES_DB=workflows
     ports:
       - '5433:5432' # Bind hosts port `5433` to container port `5432`
+  nats:
+    image: nats:2.10.25-alpine
+    ports:
+      - '4222:4222'
+      - '8222:8222'

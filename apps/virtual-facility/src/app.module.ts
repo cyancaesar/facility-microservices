@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BuildingsModule } from './buildings/buildings.module';
 import { HealthModule } from './health/health.module';
+import { ClientsModule } from '@nestjs/microservices';
 
 @Module({
   imports: [
