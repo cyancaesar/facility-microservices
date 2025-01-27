@@ -10,9 +10,10 @@ async function bootstrap() {
   // Create a hybrid app, and HTTP and a Microservice application.
   app.connectMicroservice<MicroserviceOptions>(
     {
-      transport: Transport.NATS,
+      transport: Transport.RMQ,
       options: {
-        servers: process.env.NATS_URL,
+        urls: [process.env.RABBITMQ_URL],
+        queue: 'workflows-service',
       },
     },
     {
