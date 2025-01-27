@@ -1,20 +1,22 @@
 import { CreateWorkflowDto } from '@app/workflows';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+// import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { WORKFLOWS_SERVICE } from './constants';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
 import { Building } from './entities/building.entity';
 import { lastValueFrom } from 'rxjs';
+import { Outbox } from '../outbox/entities/outbox.entity';
 
 @Injectable()
 export class BuildingsService {
   constructor(
     @InjectRepository(Building)
     private readonly buildingRepository: Repository<Building>,
-    @Inject(WORKFLOWS_SERVICE) private readonly workflowsService: ClientProxy,
+    // @Inject(WORKFLOWS_SERVICE) private readonly workflowsService: ClientProxy,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(): Promise<Building[]> {
@@ -30,14 +32,37 @@ export class BuildingsService {
   }
 
   async create(createBuildingDto: CreateBuildingDto): Promise<Building> {
-    const building = this.buildingRepository.create({
-      ...createBuildingDto,
-    });
-    const newBuilding = await this.buildingRepository.save(building);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Create a workflow
-    await this.createWorkflow(newBuilding.id);
-    return newBuilding;
+    const buildingRepository = queryRunner.manager.getRepository(Building);
+    const outboxRepository = queryRunner.manager.getRepository(Outbox);
+
+    try {
+      const building = buildingRepository.create({
+        ...createBuildingDto,
+      });
+      const newBuilding = await buildingRepository.save(building);
+
+      await outboxRepository.save({
+        type: 'workflows.create',
+        payload: {
+          name: 'My workflow',
+          buildingId: building.id,
+        },
+        target: WORKFLOWS_SERVICE.description,
+      });
+
+      await queryRunner.commitTransaction();
+
+      return newBuilding;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async update(
@@ -60,14 +85,14 @@ export class BuildingsService {
     return this.buildingRepository.remove(building);
   }
 
-  async createWorkflow(buildingId: number) {
-    const workflow = await lastValueFrom(
-      this.workflowsService.send('workflows.create', {
-        name: 'My Workflow',
-        buildingId,
-      } as CreateWorkflowDto),
-    );
-    console.log({ workflow });
-    return workflow;
-  }
+  // async createWorkflow(buildingId: number) {
+  //   const workflow = await lastValueFrom(
+  //     this.workflowsService.send('workflows.create', {
+  //       name: 'My Workflow',
+  //       buildingId,
+  //     } as CreateWorkflowDto),
+  //   );
+  //   console.log({ workflow });
+  //   return workflow;
+  // }
 }

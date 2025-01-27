@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BuildingsModule } from './buildings/buildings.module';
 import { HealthModule } from './health/health.module';
-import { ClientsModule } from '@nestjs/microservices';
+import { OutboxModule } from './outbox/outbox.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: 'apps/virtual-facility/.env',
     }),
@@ -24,6 +26,7 @@ import { ClientsModule } from '@nestjs/microservices';
     }),
     BuildingsModule,
     HealthModule,
+    OutboxModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,15 +9,16 @@ import { WORKFLOWS_SERVICE } from './constants';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Building]),
-    ClientsModule.register([
-      {
-        name: WORKFLOWS_SERVICE,
-        transport: Transport.RMQ,
-        options: {
-          urls: [process.env.RABBITMQ_URL],
-        },
-      },
-    ]),
+    // ClientsModule.register([
+    //   {
+    //     name: WORKFLOWS_SERVICE,
+    //     transport: Transport.RMQ,
+    //     options: {
+    //       urls: [process.env.RABBITMQ_URL],
+    //       queue: 'workflows_queue',
+    //     },
+    //   },
+    // ]),
   ],
   controllers: [BuildingsController],
   providers: [BuildingsService],
