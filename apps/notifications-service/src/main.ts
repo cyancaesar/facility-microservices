@@ -11,6 +11,11 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [process.env.RABBITMQ_URL],
+        /**
+         * [Receiver]
+         * Subscribe to any messages/events that is in `notifications_queue` queue.
+         */
+        queue: 'notifications_queue',
       },
     },
     {

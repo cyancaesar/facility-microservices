@@ -3,12 +3,12 @@ import { ClientProxy, EventPattern, Payload } from '@nestjs/microservices';
 import { AlarmsServiceService } from './alarms-service.service';
 import { NATS_MESSAGE_BROKER, NOTIFICATIONS_SERVICE } from './constants';
 import { lastValueFrom } from 'rxjs';
+// import { Interval } from '@nestjs/schedule';
 
 @Controller()
 export class AlarmsServiceController {
   private readonly logger = new Logger(AlarmsServiceController.name);
   constructor(
-    private readonly alarmsServiceService: AlarmsServiceService,
     @Inject(NATS_MESSAGE_BROKER)
     private readonly natsMessageBroker: ClientProxy,
     @Inject(NOTIFICATIONS_SERVICE)

@@ -9,11 +9,21 @@ async function bootstrap() {
 
   app.connectMicroservice<MicroserviceOptions>(
     {
+      transport: Transport.NATS,
+      options: {
+        servers: process.env.NATS_URL,
+      },
+    },
+    {
+      inheritAppConfig: true,
+    },
+  );
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
       transport: Transport.RMQ,
       options: {
         urls: [process.env.RABBITMQ_URL],
-        queue: 'notifications-service',
-        noAck: false,
       },
     },
     {
